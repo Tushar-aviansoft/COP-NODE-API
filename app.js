@@ -102,6 +102,10 @@ app.use("/seo", seoRoute);
 
 app.use("/job", jobsRoute);
 
+app.get("/", (req, res)=>{
+  res.send("hello from cop_api !!..")
+})
+
 app.use(errorConverter);
 app.use(errorHandler);
 module.exports = app;
