@@ -48,8 +48,11 @@ app.use(express.json());
 app.use(
   cors({
     credentials: true,
-    origin: '*',
-    methods: '*',
+    origin: (origin, callback) => {
+      // Allow all origins dynamically
+      callback(null, true);
+    },
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"], // Explicitly define methods
   })
 );
 morgan.format("custom", ":method :url :status :response-time[3]ms");
