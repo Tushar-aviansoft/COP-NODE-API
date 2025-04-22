@@ -49,7 +49,7 @@ app.use(
   cors({
     credentials: true,
     origin: '*',
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    methods: '*',
   })
 );
 morgan.format("custom", ":method :url :status :response-time[3]ms");
