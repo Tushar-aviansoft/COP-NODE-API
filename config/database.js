@@ -13,7 +13,7 @@ const db = knex({
   },
   pool: {
     min: 5,
-    max: 20,
+    max: 30,
     acquireTimeoutMillis: 5000, // Timeout for acquiring a connection
     createTimeoutMillis: 3000, // Timeout for creating a new connection
     validate: (conn) => conn.query("SELECT 1"), // Validate connections
