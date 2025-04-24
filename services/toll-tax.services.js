@@ -14,6 +14,9 @@ const tollTaxResponse = async (
     page_name, auth, cityUuidFromCookie
   ) => {
     try {
+      if (!auth) {
+        throw new ApiError(httpStatus.UNAUTHORIZED, "You are not authenticated.");
+      }
       // 1. Update customer toll/fuel count
       const userTollFuelCount = await db('cop_customers')
         .select('toll_count', 'fuel_count')
