@@ -2,14 +2,22 @@ const { City } = require("../config/constant");
 const db = require("../config/database");
 const ApiError = require("../utils/ApiError");
 const httpStatus = require("http-status");
+const imagePath = require("../config/image-path");
 
 const cities = async () => {
   const query = () => {
     return db("cop_city_ms")
       .rightJoin("cop_pe_ms", "cop_pe_ms.city_id", "cop_city_ms.city_id")
       .whereNotNull("cop_pe_ms.city_id")
-      .select("cop_city_ms.uuid as id", "cop_city_ms.city_name")
-      .groupBy("cop_pe_ms.city_id", "cop_city_ms.city_name");
+      .select(
+        "cop_city_ms.uuid as id",
+        "cop_city_ms.city_name",
+        db.raw(
+          `CONCAT(?, cop_city_ms.city_id, '/', cop_city_ms.city_image) as city_image`,
+          [imagePath.city] 
+        )
+      )
+      .groupBy("cop_pe_ms.city_id", "cop_city_ms.city_name", "cop_city_ms.city_id", "cop_city_ms.city_image");
   };
   try {
     const result = await query();

@@ -4,6 +4,7 @@ const imagePath = {
   carTypes: `${process.env.IMAGE_PATH}public/car_types/`,
   specification: `${process.env.IMAGE_PATH}public/Specification/`,
   feature: `${process.env.IMAGE_PATH}public/Feature/`,
+  city:`${process.env.IMAGE_PATH}public/city_image/`,
   carGraphics: (model_id, gt_type, image_name) =>
     `${process.env.IMAGE_PATH}public/car_graphics/${model_id}/${gt_type}/${image_name}`,
   carGraphicsThumb: (model_id, gt_type, image_name) =>
@@ -14,4 +15,3 @@ const imagePath = {
 };
 
 module.exports = imagePath;
-
