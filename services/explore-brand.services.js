@@ -63,7 +63,7 @@ const brands = async (models = false, carTypes = false) => {
       );
     }
     const result = await query;
-    const formattedResult = result.map((brand) => {
+    const formattedResult = result.length === 0 ? {} : result.map((brand) => {
       return {
         brand_id: brand.id,
         brand_name: brand.brand_name,
@@ -190,6 +190,10 @@ const models = async (
     const data = await query;
     const totalRecords = data.length ? data[0].total_count : 0;
     const totalPages = Math.ceil(totalRecords / limit);
+
+    if (data.length === 0) {
+      return {};
+    }
 
     return {
       data,
@@ -390,6 +394,9 @@ const variants = async (brand, model, cityId, fuelType = 'all') => {
         fuel_types = [
           ...new Set(variants.map((item) => item.fuel_type).filter(Boolean)),
         ];
+        if (!variants || variants.length === 0) {
+          return {};
+        }
         return { upcoming_stage, fuel_types, variants };
       }
     } else {
@@ -426,7 +433,7 @@ const gallery = async (brand, model) => {
   try {
     const data = await query;
     if (data.length === 0) {
-      throw new ApiError(httpStatus.NOT_FOUND, "Data not found");
+      return {}      
     }
 
     // Create an empty object with the desired order
@@ -576,6 +583,9 @@ const variantDetail = async (
 
   try {
     const data = await query;
+    if (!data || data.length === 0) {
+      return {};
+    }
     const variantDetail = data.map((item) => {
       if (item.feature_values) {
         const featureObj = JSON.parse(item.feature_values);;
@@ -786,8 +796,9 @@ const variantColors = async (brand, model, variant) => {
 
   try {
     const data = await query;
-
-
+    if (!data || data.length === 0) {
+      return {};
+    }
     return data;
   } catch (err) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err.message);
@@ -868,6 +879,9 @@ const variantPrice = async (brand, model, variant, cityId, auth) => {
 
     // Execute main query and process results
     const data = await query;
+    if (!data || data.length === 0) {
+      return {};
+    }
 
     // Get unique fuel types
     const fuelTypes = [...new Set(data.map(item => item.fuel_type || ""))];
@@ -947,6 +961,10 @@ const variantSpecifications = async (brand, model, variant, isShort) => {
 
   try {
     const data = await query;
+
+    if (!data || data.length === 0) {
+      return {};
+    }
 
     const transformedData = data.reduce((acc, item) => {
       const { sc_name, spec_name, features_name, feature_value, spec_image } = item;
@@ -1097,6 +1115,9 @@ const variantKeyHighlights = async (brand, model, variant) => {
 
   try {
     const data = await query;
+    if (!data || data.length === 0) {
+      return {};
+    }
     const transformedData = data.reduce((result, item) => {
       const { sc_name, features_name, feature_value, features_image } = item;
       const categoryName = KeyHighlightsDisplayName[sc_name] || sc_name;
