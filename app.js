@@ -45,14 +45,20 @@ const initializeCrons = require("./jobs/index");
 const app = express();
 app.use(cookieParser());
 app.use(express.json());
+// Convert the comma-separated URLs into an array
+const allowedOrigins = process.env.FRONTEND_URLS?.split(",") || [];
+ 
 app.use(
   cors({
     credentials: true,
     origin: (origin, callback) => {
-      // Allow all origins dynamically
-      callback(null, true);
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
     },
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"], // Explicitly define methods
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   })
 );
 morgan.format("custom", ":method :url :status :response-time[3]ms");
