@@ -96,6 +96,10 @@ function processGraphicFiles(item) {
     )
   );
 }
+
+function getFeatureValue(feature) {
+  return feature ? feature.trim().toLowerCase() : '';
+}
 module.exports = {
   getUpcomingDateRange,
   getNewLaunchedDateRange,
@@ -103,4 +107,5 @@ module.exports = {
   wishListModelSubQuery,
   wishListVariantSubQuery,
   processGraphicFiles,
+  getFeatureValue
 };
