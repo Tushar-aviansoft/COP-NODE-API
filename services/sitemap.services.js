@@ -13,7 +13,9 @@ const siteMap = async (model, variant) => {
                 .innerJoin("cop_models", "cop_brands_ms.brand_id", "cop_models.brand_id")
                 .select(
                     db.raw(`CONCAT('/' ,cop_brands_ms.slug, '-cars/', cop_models.slug) AS slug`)
-                );
+                )
+                .where("cop_brands_ms.status", 1)
+                .where("cop_models.status", 1);
 
             result.models = models;
         }
@@ -24,7 +26,10 @@ const siteMap = async (model, variant) => {
                 .innerJoin("cop_variants", "cop_models.model_id", "cop_variants.model_id")
                 .select(
                     db.raw(`CONCAT('/', cop_brands_ms.slug, '-cars/', cop_models.slug, '/' , cop_variants.slug ) AS slug`)
-                );
+                )
+                .where("cop_brands_ms.status", 1)
+                .where("cop_models.status", 1)
+                .where("cop_variants.status", 1)
             result.variants = variants;
         }
 
