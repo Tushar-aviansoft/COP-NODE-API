@@ -36,6 +36,8 @@ const pageHeadRoute = require("./routes/page-head.routes");
 const seoRoute = require("./routes/seo.routes");
 const tollTaxRoute = require("./routes/toll-tax.routes");
 const jobsRoute = require("./routes/jobs.routes");
+const siteMapRoute = require("./routes/sitemap.routes")
+
 
 const logger = require("./config/logger");
 
@@ -110,6 +112,8 @@ app.use("/toll-tax", tollTaxRoute);
 app.use("/seo", seoRoute);
 
 app.use("/job", jobsRoute);
+app.use("/sitemap", siteMapRoute)
+
 
 app.get("/", (req, res)=>{
   res.send("hello from cop_api !!..")
