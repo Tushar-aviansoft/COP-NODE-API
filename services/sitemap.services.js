@@ -10,12 +10,12 @@ const siteMap = async (model, variant) => {
 
         if (model) {
             const models = await db("cop_brands_ms")
-                .innerJoin("cop_models", "cop_brands_ms.brand_id", "cop_models.brand_id")
-                .select(
-                    db.raw(`CONCAT('/' ,cop_brands_ms.slug, '-cars/', cop_models.slug) AS slug`)
-                )
-                .where("cop_brands_ms.status", 1)
-                .where("cop_models.status", 1);
+            .innerJoin("cop_models", "cop_brands_ms.brand_id", "cop_models.brand_id")
+            .select(
+                db.raw(`CONCAT('/', cop_brands_ms.slug, '-cars/', cop_models.slug) AS slug`)
+            )
+            .where("cop_brands_ms.status", 1)
+            .where("cop_models.status", 1);
 
             result.models = models;
         }

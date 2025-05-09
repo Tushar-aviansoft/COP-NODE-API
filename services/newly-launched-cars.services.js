@@ -115,7 +115,7 @@ const models = async (
     const totalPages = Math.ceil(totalRecords / limit);
 
     return {
-      data: results,
+      data: results || [],
       pagination: {
         totalRecords,
         totalPages,
@@ -195,7 +195,7 @@ const launchMonth = async (brands, carTypes, minPrice, maxPrice) => {
       periodModelCounts[current] += periodModelCounts[previous];
     }
 
-    return periodModelCounts;
+    return periodModelCounts || [];
   } catch (err) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err.message);
   }
@@ -267,7 +267,7 @@ const budget = async (brands, carTypes, launchMonth) => {
         max,
       };
     });
-    return result;
+    return result || [];
   } catch (err) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err.message);
   }
@@ -309,7 +309,7 @@ const brands = async (carTypes, launchMonth, minPrice, maxPrice) => {
   };
   try {
     const data = await query();
-    return data;
+    return data || [];
   } catch (err) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err.message);
   }
@@ -354,7 +354,7 @@ const carTypes = async (brands, launchMonth, minPrice, maxPrice) => {
   };
   try {
     const data = await query();
-    return data;
+    return data || [];
   } catch (err) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err.message);
   }

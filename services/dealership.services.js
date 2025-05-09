@@ -42,7 +42,7 @@ const brands = async () => {
       };
     });
 
-    return result;
+    return result || [];
   } catch (err) {
     console.error("Error fetching brands and cities:", err);
     throw new ApiError(
@@ -89,7 +89,7 @@ const dealerships = async (brand, city, page = 1, limit = 12, search) => {
   query.where("cop_dealer.status", 1).distinct().limit(limit).offset(offset);
 
   try {
-    const data = await query;
+    const data = (await query) || [];
 
     data?.forEach((dealer) => {
       dealer.email = dealer?.email.split(",");

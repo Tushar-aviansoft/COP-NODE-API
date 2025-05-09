@@ -25,7 +25,7 @@ const warningLights = async () => {
       sub_heading: row.sub_heading ? JSON.parse(row.sub_heading) : [],
       info: row.info ? JSON.parse(row.info) : [],
     }));
-    return a;
+    return a || [];
   } catch (err) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err.message);
   }

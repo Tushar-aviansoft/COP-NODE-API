@@ -11,7 +11,8 @@ const {
   carTypes,
   FeaturesArrayForFaq,
   SafetyArrayForFaq,
-  predefinedFeatures
+  predefinedFeatures,
+  NewsWP
 } = require("../config/constant");
 const db = require("../config/database");
 const {
@@ -47,7 +48,8 @@ const brands = async (models = false, carTypes = false) => {
       .andWhere("cop_models.status", 1)
       .andWhere("cop_variants.status", 1)
       .andWhere("cop_cs_ms.cs_name", CarStages.launched)
-      .groupBy("brands.brand_id");
+      .groupBy("brands.brand_id")
+      .orderBy("brands.priority")
     if (models) {
       query.select(
         db.raw(
@@ -77,7 +79,7 @@ const brands = async (models = false, carTypes = false) => {
         car_types: carTypes && brand.car_type ? brand.car_type.split(",") : [],
       };
     });
-    return formattedResult;
+    return formattedResult || [];
   } catch (err) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err.message);
   }
@@ -192,7 +194,7 @@ const models = async (
     const totalPages = Math.ceil(totalRecords / limit);
 
     if (data.length === 0) {
-      return {};
+      return [];
     }
 
     return {
@@ -395,7 +397,7 @@ const variants = async (brand, model, cityId, fuelType = 'all') => {
           ...new Set(variants.map((item) => item.fuel_type).filter(Boolean)),
         ];
         if (!variants || variants.length === 0) {
-          return {};
+          return [];
         }
         return { upcoming_stage, fuel_types, variants };
       }
@@ -433,7 +435,7 @@ const gallery = async (brand, model) => {
   try {
     const data = await query;
     if (data.length === 0) {
-      return {}      
+      return []
     }
 
     // Create an empty object with the desired order
@@ -584,7 +586,7 @@ const variantDetail = async (
   try {
     const data = await query;
     if (!data || data.length === 0) {
-      return {};
+      return [];
     }
     const variantDetail = data.map((item) => {
       if (item.feature_values) {
@@ -751,11 +753,11 @@ const variantDetail = async (
             full_slug,
           };
         }
-        return variant;
+        return variant || [];
       });
-      return { similar_variants: similarVariantsResult };
+      return { similar_variants: similarVariantsResult || [] };
     }
-    return { variant_detail: variantDetail };
+    return { variant_detail: variantDetail || [] };
   } catch (err) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err.message);
   }
@@ -797,7 +799,7 @@ const variantColors = async (brand, model, variant) => {
   try {
     const data = await query;
     if (!data || data.length === 0) {
-      return {};
+      return [];
     }
     return data;
   } catch (err) {
@@ -880,7 +882,7 @@ const variantPrice = async (brand, model, variant, cityId, auth) => {
     // Execute main query and process results
     const data = await query;
     if (!data || data.length === 0) {
-      return {};
+      return [];
     }
 
     // Get unique fuel types
@@ -916,8 +918,8 @@ const variantPrice = async (brand, model, variant, cityId, auth) => {
     });
 
     return {
-      fuel_types: fuelTypes, // Array of unique fuel types
-      variants: variants     // Array of all variants
+      fuel_types: fuelTypes || [], // Array of unique fuel types
+      variants: variants || []    // Array of all variants
     };
   } catch (err) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err.message);
@@ -963,7 +965,7 @@ const variantSpecifications = async (brand, model, variant, isShort) => {
     const data = await query;
 
     if (!data || data.length === 0) {
-      return {};
+      return [];
     }
 
     const transformedData = data.reduce((acc, item) => {
@@ -1071,7 +1073,7 @@ const variantSpecifications = async (brand, model, variant, isShort) => {
         warranty: transformedData.warranty || {}
       };
     } else {
-      return transformedData; // Return the full version result
+      return transformedData || []; // Return the full version result
     }
   } catch (err) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err.message);
@@ -1116,7 +1118,7 @@ const variantKeyHighlights = async (brand, model, variant) => {
   try {
     const data = await query;
     if (!data || data.length === 0) {
-      return {};
+      return [];
     }
     const transformedData = data.reduce((result, item) => {
       const { sc_name, features_name, feature_value, features_image } = item;
@@ -1138,7 +1140,7 @@ const variantKeyHighlights = async (brand, model, variant) => {
 
       return result;
     }, {});
-    return transformedData;
+    return transformedData || [];
   } catch (err) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err.message);
   }
@@ -1224,7 +1226,7 @@ const variantDescription = async (brand, model, variant, cityId) => {
 
       return result;
     }, {});
-    const modelName = detail[0]["name"];
+    const model = detail[0]["name"];
     const description = {};
     const modelType = detail[0]["model_type"];
     const bodyType = detail[0]["ct_name"];
@@ -1321,16 +1323,13 @@ const variantDescription = async (brand, model, variant, cityId) => {
       ] = `Safety features include ${safetyFeatures}.`;
     }
 
-    return description;
+    return description || [];
   } catch (err) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err.message);
   }
 };
 
 const variantFaq = async (brand, model, variant, cityId) => {
-  console.log("🚀 ~ variantFaq ~ brand, model, variant, cityId:", brand, model, variant, cityId)
-
-
 
   const brandModelDetailsGet = db("cop_models")
     .select(
@@ -1526,7 +1525,7 @@ const variantFaq = async (brand, model, variant, cityId) => {
       });
     }
 
-    return faqs;
+    return faqs || [];
 
   } catch (err) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err.message);
@@ -1553,7 +1552,7 @@ const modelDescription = async (brand, model) => {
 
   try {
     const data = await query;
-    return data || {};
+    return data || [];
   } catch (err) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err.message);
   }
@@ -1582,25 +1581,29 @@ const similarModels = async (brand) => {
       query.select(
         db.raw(
           `(SELECT GROUP_CONCAT(DISTINCT JSON_OBJECT(
-          'id', m.uuid, 
-          'car_type', ct.ct_name, 
-          'name', m.model_name, 
-          'slug', m.slug,
-          'image', CONCAT(?, m.brand_id, '/', m.model_id, '/', m.model_image),
-          'min_price', m.min_price,
-          'max_price', m.max_price
-        )) 
-        FROM cop_models m
-        INNER JOIN cop_ct_ms ct ON ct.ct_id = m.ct_id  -- Join with cop_ct_ms for car type
-        WHERE m.brand_id = brands.brand_id AND m.status = 1) AS model_data`,
-          [imagePath.brand]
+              'id', m.uuid, 
+              'car_type', ct.ct_name, 
+              'name', m.model_name, 
+              'slug', m.slug,
+              'image', CONCAT(?, m.brand_id, '/', m.model_id, '/', m.model_image),
+              'min_price', m.min_price,
+              'max_price', m.max_price
+            )) 
+            FROM cop_models m
+            INNER JOIN cop_ct_ms ct ON ct.ct_id = m.ct_id
+            INNER JOIN cop_cs_ms cs ON cs.cs_id = m.cs_id  
+            WHERE m.brand_id = brands.brand_id 
+              AND m.status = 1 
+              AND cs.cs_name = ?  
+            ) AS model_data`,
+          [imagePath.brand, CarStages.launched]
         )
       );
     }
 
     const result = await query;
     if (!result) {
-      return null;
+      return [];
     }
 
     const formattedResult = {
@@ -1609,7 +1612,264 @@ const similarModels = async (brand) => {
       models: result.model_data ? JSON.parse("[" + result.model_data + "]") : [],
     };
 
-    return formattedResult;
+    return formattedResult || [];
+  } catch (err) {
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err.message);
+  }
+};
+
+
+
+const newsBlogsModelList = async (brand) => {
+  try {
+    if (!brand || brand.trim() === "") {
+      throw new Error("missing_required_field");
+    }
+
+    const models = await db("cop_models")
+      .select(
+        "cop_brands_ms.brand_id",
+        "cop_brands_ms.brand_name",
+        "cop_brands_ms.slug as brand_slug",
+        "cop_models.model_id",
+        "cop_models.model_name",
+        "cop_models.slug as model_slug",
+        db("cop_variants")
+          .select("cop_variants.variant_id")
+          .whereRaw("cop_variants.model_id = cop_models.model_id")
+          .andWhere("cop_variants.status", 1)
+          .limit(1)
+          .as("variant_id"),
+        db("cop_variants")
+          .select("cop_variants.variant_image")
+          .whereRaw("cop_variants.model_id = cop_models.model_id")
+          .andWhere("cop_variants.status", 1)
+          .limit(1)
+          .as("variant_image"),
+        db("cop_pe_ms")
+          .min("ex_showroom_price")
+          .whereRaw("cop_pe_ms.model_id = cop_models.model_id")
+          .andWhere("cop_pe_ms.city_id", NewsWP.CITY_ID)
+          .andWhere("cop_pe_ms.status", 1)
+          .as("min_ex_showroom_price"),
+        db("cop_pe_ms")
+          .max("ex_showroom_price")
+          .whereRaw("cop_pe_ms.model_id = cop_models.model_id")
+          .andWhere("cop_pe_ms.city_id", NewsWP.CITY_ID)
+          .andWhere("cop_pe_ms.status", 1)
+          .as("max_ex_showroom_price")
+      )
+      .join("cop_brands_ms", "cop_brands_ms.brand_id", "cop_models.brand_id")
+      .join("cop_variants", "cop_variants.model_id", "cop_models.model_id")
+      .where("cop_brands_ms.brand_name", brand)
+      .andWhere("cop_brands_ms.status", 1)
+      .andWhere("cop_models.status", 1)
+      .distinct();
+
+    if (!models || models.length === 0) {
+      throw new Error("data_not_found");
+    }
+
+    return models.map((item) => {
+      const encryptedBrandId = item.brand_id;
+      const encryptedModelId = item.model_id;
+      const encryptedVariantId = item.variant_id;
+      const variantImagePath = `${imagePath.brand}${item.brand_id}/${item.model_id}/${item.variant_id}/${item.variant_image}`;
+      const price = (item.min_ex_showroom_price, item.max_ex_showroom_price);
+
+      return {
+        ...item,
+        brand_id: encryptedBrandId,
+        model_id: encryptedModelId,
+        variant_id: encryptedVariantId,
+        variant_image: variantImagePath,
+        price,
+      };
+    });
+  } catch (err) {
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err.message);
+  }
+};
+
+
+
+const newsBlogsModelDescription = async (model) => {
+  try {
+    if (!model || model.trim() === "") {
+      throw new Error("missing_required_field");
+    }
+
+    const displacement = Features.displacement;
+    const mileage = Features.mileage;
+    const transmission = Features.transmission;
+    const battery_capacity = Features.batteryCapacity;
+    const range = FeaturesDisplayName.Range;
+    const power = Features.power;
+    const power_ev = Features.evPower;
+    const cityId = NewsWP.CITY_ID;
+
+    const models = await db("cop_models")
+      .select(
+        "cop_brands_ms.brand_id",
+        "cop_brands_ms.brand_name",
+        "cop_brands_ms.slug as brand_slug",
+        "cop_models.model_id",
+        "cop_models.model_name",
+        "cop_models.model_type",
+        "cop_models.slug as model_slug",
+        db("cop_variants")
+          .select("cop_variants.variant_id")
+          .whereRaw("cop_variants.model_id = cop_models.model_id")
+          .andWhere("cop_variants.status", 1)
+          .limit(1)
+          .as("variant_id"),
+        db("cop_variants")
+          .select("cop_variants.variant_image")
+          .whereRaw("cop_variants.model_id = cop_models.model_id")
+          .andWhere("cop_variants.status", 1)
+          .limit(1)
+          .as("variant_image"),
+        db("cop_pe_ms")
+          .min("ex_showroom_price")
+          .whereRaw("cop_pe_ms.model_id = cop_models.model_id")
+          .andWhere("cop_pe_ms.city_id", cityId)
+          .andWhere("cop_pe_ms.status", 1)
+          .as("min_ex_showroom_price"),
+        db("cop_pe_ms")
+          .max("ex_showroom_price")
+          .whereRaw("cop_pe_ms.model_id = cop_models.model_id")
+          .andWhere("cop_pe_ms.city_id", cityId)
+          .andWhere("cop_pe_ms.status", 1)
+          .as("max_ex_showroom_price"),
+        db("cop_colors")
+          .select(
+            db.raw(`JSON_ARRAYAGG(JSON_OBJECT(
+              "color_id", cop_colors.color_id,
+              "color_name", cop_colors.color_name,
+              "color_code", cop_colors.color_code,
+              "dual_color_code", cop_colors.dual_color_code
+            ))`)
+          )
+          .whereRaw("cop_colors.variant_id = cop_variants.variant_id")
+          .as("variant_colors"),
+        db("cop_fv")
+          .select(db.raw("MIN(CAST(cop_fv.feature_value AS DOUBLE))"))
+          .leftJoin("cop_features_ms", "cop_features_ms.feature_id", "cop_fv.feature_id")
+          .leftJoin("cop_su_ms", "cop_su_ms.su_id", "cop_features_ms.su_id")
+          .whereRaw("cop_fv.variant_id = cop_variants.variant_id")
+          .whereRaw(`cop_features_ms.features_name IN ("${displacement}", "${battery_capacity}")`)
+          .groupBy("cop_su_ms.su_name")
+          .as("displacement_or_battery_cap"),
+        db("cop_fv")
+          .select(
+            db.raw(`JSON_ARRAYAGG(JSON_OBJECT(
+              "feature_id", cop_features_ms.feature_id,
+              "feature_image", cop_features_ms.features_image
+            ))`)
+          )
+          .join("cop_features_ms", "cop_features_ms.feature_id", "cop_fv.feature_id")
+          .whereRaw("cop_fv.variant_id = cop_variants.variant_id")
+          .whereRaw(`cop_features_ms.features_name IN ("${displacement}", "${battery_capacity}")`)
+          .as("displacement_or_battery_cap_data"),
+        db("cop_fv")
+          .select(db.raw("MIN(CAST(cop_fv.feature_value AS DOUBLE))"))
+          .leftJoin("cop_features_ms", "cop_features_ms.feature_id", "cop_fv.feature_id")
+          .leftJoin("cop_su_ms", "cop_su_ms.su_id", "cop_features_ms.su_id")
+          .whereRaw("cop_fv.variant_id = cop_variants.variant_id")
+          .whereRaw(`cop_features_ms.features_name IN ("${mileage}", "${range}")`)
+          .groupBy("cop_su_ms.su_name")
+          .as("mileage_or_range"),
+        db("cop_fv")
+          .select(
+            db.raw(`JSON_ARRAYAGG(JSON_OBJECT(
+              "feature_id", cop_features_ms.feature_id,
+              "feature_image", cop_features_ms.features_image
+            ))`)
+          )
+          .join("cop_features_ms", "cop_features_ms.feature_id", "cop_fv.feature_id")
+          .whereRaw("cop_fv.variant_id = cop_variants.variant_id")
+          .whereRaw(`cop_features_ms.features_name IN ("${mileage}", "${range}")`)
+          .as("mileage_or_range_data"),
+        db("cop_fv")
+          .select(db.raw("MIN(CAST(cop_fv.feature_value AS DOUBLE))"))
+          .leftJoin("cop_features_ms", "cop_features_ms.feature_id", "cop_fv.feature_id")
+          .leftJoin("cop_su_ms", "cop_su_ms.su_id", "cop_features_ms.su_id")
+          .whereRaw("cop_fv.variant_id = cop_variants.variant_id")
+          .whereRaw(`cop_features_ms.features_name IN ("${power}", "${power_ev}")`)
+          .groupBy("cop_su_ms.su_name")
+          .as("power"),
+        db("cop_fv")
+          .select(
+            db.raw(`JSON_ARRAYAGG(JSON_OBJECT(
+              "feature_id", cop_features_ms.feature_id,
+              "feature_image", cop_features_ms.features_image
+            ))`)
+          )
+          .join("cop_features_ms", "cop_features_ms.feature_id", "cop_fv.feature_id")
+          .whereRaw("cop_fv.variant_id = cop_variants.variant_id")
+          .whereRaw(`cop_features_ms.features_name IN ("${power}", "${power_ev}")`)
+          .as("power_data"),
+        db("cop_fv")
+          .select("cop_fv.feature_value")
+          .join("cop_features_ms", "cop_features_ms.feature_id", "cop_fv.feature_id")
+          .whereRaw("cop_fv.variant_id = cop_variants.variant_id")
+          .whereRaw(`cop_features_ms.features_name = "${transmission}"`)
+          .as("transmission"),
+        db("cop_fv")
+          .select(
+            db.raw(`JSON_ARRAYAGG(JSON_OBJECT(
+              "feature_id", cop_features_ms.feature_id,
+              "feature_image", cop_features_ms.features_image
+            ))`)
+          )
+          .join("cop_features_ms", "cop_features_ms.feature_id", "cop_fv.feature_id")
+          .whereRaw("cop_fv.variant_id = cop_variants.variant_id")
+          .whereRaw(`cop_features_ms.features_name = "${transmission}"`)
+          .as("transmission_data")
+      )
+      .join("cop_brands_ms", "cop_brands_ms.brand_id", "cop_models.brand_id")
+      .join("cop_variants", "cop_variants.model_id", "cop_models.model_id")
+      .where("cop_models.model_name", model)
+      .andWhere("cop_brands_ms.status", 1)
+      .andWhere("cop_models.status", 1)
+      .andWhere("cop_variants.status", 1)
+      .limit(1);
+
+    if (!models || models.length === 0) {
+      throw new Error("data_not_found");
+    }
+
+    return models.map((item) => {
+      const variantColors = item.variant_colors ? JSON.parse(item.variant_colors) : [];
+      const displacementOrBatteryData = item.displacement_or_battery_cap_data ? JSON.parse(item.displacement_or_battery_cap_data) : [];
+      const mileageOrRangeData = item.mileage_or_range_data ? JSON.parse(item.mileage_or_range_data) : [];
+      const powerData = item.power_data ? JSON.parse(item.power_data) : [];
+      const transmissionData = item.transmission_data ? JSON.parse(item.transmission_data) : [];
+
+      const price = {
+        min: item.min_ex_showroom_price,
+        max: item.max_ex_showroom_price
+      };
+
+      return {
+        ...item,
+        variant_image: `${imagePath.brand}${item.brand_id}/${item.model_id}/${item.variant_id}/${item.variant_image}`,
+        price,
+        variant_colors: variantColors,
+        displacement_or_battery_image: displacementOrBatteryData?.[0]
+          ? `${imagePath.feature}${displacementOrBatteryData[0].feature_id}/${displacementOrBatteryData[0].feature_image}`
+          : null,
+        mileage_or_range_image: mileageOrRangeData?.[0]
+          ? `${imagePath.feature}${mileageOrRangeData[0].feature_id}/${mileageOrRangeData[0].feature_image}`
+          : null,
+        power_image: powerData?.[0]
+          ? `${imagePath.feature}${powerData[0].feature_id}/${powerData[0].feature_image}`
+          : null,
+        transmission_image: transmissionData?.[0]
+          ? `${imagePath.feature}${transmissionData[0].feature_id}/${transmissionData[0].feature_image}`
+          : null
+      };
+    });
   } catch (err) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err.message);
   }
@@ -1633,4 +1893,6 @@ module.exports = {
   variantFaq,
   modelDescription,
   similarModels,
+  newsBlogsModelList,
+  newsBlogsModelDescription
 };

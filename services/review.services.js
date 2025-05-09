@@ -84,7 +84,7 @@ const ratingAndReviews = async (brand, model, limit, auth) => {
 
     return {
       user_review_exist: user_review_exist ? 1 : 0,
-      reviews: data,
+      reviews: data || [],
       ratingCount,
       totalRating,
       averageRating,

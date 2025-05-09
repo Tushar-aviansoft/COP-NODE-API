@@ -31,7 +31,7 @@ const search = async (search) => {
         .limit(20);
     }
 
-    return result;
+    return result || [];
   } catch (err) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err.message);
   }

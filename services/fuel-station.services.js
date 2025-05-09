@@ -19,7 +19,7 @@ const cities = async () => {
   try {
     const data = await query;
 
-    return data;
+    return data || [];
   } catch (err) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err.message);
   }
@@ -65,7 +65,7 @@ const fuelStations = async (city, page = 1, limit = 12, search) => {
     .offset(offset);
 
   try {
-    const data = await query;
+    const data = (await query) || [];
     const totalRecords = data.length ? data[0].total_count : 0;
     const totalPages = Math.ceil(totalRecords / limit);
 

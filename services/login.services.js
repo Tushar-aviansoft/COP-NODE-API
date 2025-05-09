@@ -45,6 +45,8 @@ const sendOtp = async (mobile) => {
       `&dlttempid=${templateId}` +
       `&message=${encodeURIComponent(message)}`;
 
+
+
     const expiresAt = moment().utc().add(10, 'minutes').format('YYYY-MM-DD HH:mm:ss');
 
 
@@ -52,7 +54,7 @@ const sendOtp = async (mobile) => {
     await db("cop_otp_log_details").insert({
       email_or_mobile: mobileNumber,
       otp: otp,
-      expires_at: expiresAt,
+      expire_at: expiresAt,
       status: "0",
     });
 
@@ -81,88 +83,87 @@ const sendOtp = async (mobile) => {
 
 const verifyOtp = async (mobile, otp) => {
   try {
-    if (mobile) {
-      const mobileNumber = "91" + mobile;
-
-      const currentTime = moment().utc();
-      const tenMinutesLater = moment().add(10, 'minutes').utc();
-
-      // Step 1: Verify OTP and check if it's still valid within 10 minutes window
-      const verify_otp = await db("cop_otp_log_details")
-        .where({
-          email_or_mobile: mobileNumber,
-          otp: otp
-        })
-        .andWhere('expires_at', '>', currentTime.format('YYYY-MM-DD HH:mm:ss'))
-        .andWhere('expires_at', '<=', tenMinutesLater.format('YYYY-MM-DD HH:mm:ss'))
-        .first();
-
-
-      if (!verify_otp) {
-        console.log("Invalid or expired OTP");
-        throw new ApiError(httpStatus.BAD_REQUEST, "Invalid or expired OTP");
-      }
-
-      // Step 2: Update the OTP status to 'verified'
-      const updateStatus = await db('cop_otp_log_details')
-        .where({
-          email_or_mobile: mobileNumber,
-          status: "0"
-        })
-        .update({ status: "1" });
-
-      let token = "";
-      // Step 4: Get customer data to generate token
-      const existingRecord = await db("cop_customers")
-        .select("uuid", "first_name", "profile_pic", "toll_count", "fuel_count")
-        .where("contact_no", mobileNumber)
-        .first();
-
-      if (!existingRecord) {
-
-        // Step 3: Insert customer into the cop_customers table
-        const insertCustomer = await db('cop_customers')
-          .insert({
-            contact_no: mobileNumber,
-            is_verified: 1,
-            created_at: new Date(),
-            uuid: db.raw("UUID()")
-          })
-
-        // Step 5: Generate JWT token
-        token = jwt.sign(
-          { uuid: insertCustomer.uuid },
-          process.env.JWT_SECRET,
-          { expiresIn: "1h" }
-        );
-
-        console.log("Customer not found after inserting.");
-        // throw new ApiError(httpStatus.NOT_FOUND, "Customer not found.");
-      }
-      else {
-        // Step 5: Generate JWT token
-        token = jwt.sign(
-          { uuid: existingRecord.uuid },
-          process.env.JWT_SECRET,
-          { expiresIn: "1h" }
-        );
-      }
-
-      if (!token) {
-        throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "Token generation failed.");
-      }
-
-      return {
-        token: token,
-        sign_up: 1,
-        name: existingRecord.first_name ?? "",
-        contact_no: mobileNumber,
-        profile_pic: existingRecord.profile_pic ?? "",
-        toll_count: existingRecord.toll_count ?? null,
-        fuel_count: existingRecord.fuel_count ?? null,
-        statusCode: httpStatus.OK,
-      };
+    if (!mobile) {
+      throw new ApiError(httpStatus.BAD_REQUEST, "Mobile number is required");
     }
+
+    const mobileNumber = "91" + mobile;
+    const currentTime = moment().utc();
+    const tenMinutesLater = moment().add(10, 'minutes').utc();
+
+    // Step 1: Verify OTP and check if it's still valid within 10 minutes window
+    const verify_otp = await db("cop_otp_log_details")
+      .where({
+        email_or_mobile: mobileNumber,
+        otp: otp
+      })
+      .andWhere('expire_at', '>', currentTime.format('YYYY-MM-DD HH:mm:ss'))
+      .andWhere('expire_at', '<=', tenMinutesLater.format('YYYY-MM-DD HH:mm:ss'))
+      .first();
+
+    if (!verify_otp) {
+      console.log("Invalid or expired OTP");
+      throw new ApiError(httpStatus.BAD_REQUEST, "Invalid or expired OTP");
+    }
+
+    // Step 2: Update the OTP status to 'verified'
+    await db('cop_otp_log_details')
+      .where({
+        email_or_mobile: mobileNumber,
+        status: "0"
+      })
+      .update({ status: "1" });
+
+    let token = "";
+    let customerData = null;
+
+    // Step 4: Get customer data to generate token
+    const existingRecord = await db("cop_customers")
+      .select("uuid", "first_name", "profile_pic", "toll_count", "fuel_count")
+      .where("contact_no", mobileNumber)
+      .first();
+
+    if (!existingRecord) {
+      // Step 3: Insert customer into the cop_customers table
+      const [insertedId] = await db('cop_customers')
+        .insert({
+          contact_no: mobileNumber,
+          is_verified: 1,
+          created_at: new Date()
+        });
+
+      customerData = await db('cop_customers')
+        .where({ customer_id: insertedId })
+        .first();
+
+      if (!customerData) {
+        throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "Failed to retrieve newly inserted customer.");
+      }
+    } else {
+      customerData = existingRecord;
+    }
+
+    // Step 5: Generate JWT token
+    token = jwt.sign(
+      { uuid: customerData.uuid },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    if (!token) {
+      throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "Token generation failed.");
+    }
+
+    return {
+      token: token,
+      sign_up: existingRecord ? 0 : 1, // 1 for new signup, 0 for existing
+      name: customerData.first_name ?? "",
+      contact_no: mobileNumber,
+      profile_pic: customerData.profile_pic ?? "",
+      toll_count: customerData.toll_count ?? null,
+      fuel_count: customerData.fuel_count ?? null,
+      statusCode: httpStatus.OK,
+    };
   } catch (err) {
     console.error("Error in verifyOtp:", err.message);
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err.message);

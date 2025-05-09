@@ -48,7 +48,7 @@ const seoMetaData = async (brand, model, variant, page_name_slug) => {
     try {
         const seoData = await seoDataGet;
 
-        return seoData;
+        return seoData || [];
     } catch (err) {
         throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err.message);
     }

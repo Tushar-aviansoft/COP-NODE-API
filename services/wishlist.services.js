@@ -168,7 +168,7 @@ const userWishlist = async (auth, city) => {
   try {
     const result = await query;
 
-    return result;
+    return result || [];
   } catch (err) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err.message);
   }

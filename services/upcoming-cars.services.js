@@ -140,7 +140,7 @@ const models = async (
     }
 
     return {
-      data: formattedResults,
+      data: formattedResults || [],
       pagination: {
         totalRecords,
         totalPages,
@@ -212,7 +212,7 @@ const budget = async (brands, carTypes, launchMonth) => {
         };
       })
       .filter((result) => result.count > 0);
-    return formattedResults;
+    return formattedResults || [];
   } catch (err) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err.message);
   }
@@ -274,7 +274,7 @@ const brands = async (carTypes, launchMonth, budget) => {
   };
   try {
     const data = await query();
-    return data;
+    return data || [];
   } catch (err) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err.message);
   }
@@ -337,7 +337,7 @@ const carTypes = async (brands, launchMonth, budget) => {
   };
   try {
     const data = await query();
-    return data;
+    return data || [];
   } catch (err) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err.message);
   }

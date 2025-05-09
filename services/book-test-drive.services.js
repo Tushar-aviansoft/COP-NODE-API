@@ -68,7 +68,7 @@ const preferences = async (brand, model) => {
       fuel: result.fuel ? result.fuel.split(",") : [],
       transmission: result.transmission ? result.transmission.split(",") : [],
     };
-    return groupedFeatures;
+    return groupedFeatures || [];
   } catch (err) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err.message);
   }

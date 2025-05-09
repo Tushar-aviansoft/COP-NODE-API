@@ -62,7 +62,7 @@ const headBanners = async () => {
   };
   try {
     const result = await query();
-    return result;
+    return result || [];
   } catch (err) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err.message);
   }
@@ -123,7 +123,7 @@ const upComingBanners = async () => {
   };
   try {
     const result = await query();
-    return result;
+    return result || [];
   } catch (err) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err.message);
   }
@@ -199,7 +199,7 @@ const evBanners = async (cityId) => {
   };
   try {
     const result = await query();
-    return result;
+    return result || [];
   } catch (err) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err.message);
   }
@@ -218,7 +218,7 @@ const carTypes = async () => {
   };
   try {
     const result = await query();
-    return result;
+    return result || [];
   } catch (err) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err.message);
   }
@@ -286,7 +286,7 @@ const trendingCars = async (cityId, type, auth) => {
           })
         : [],
     }));
-    return cars;
+    return cars || [];
   } catch (err) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err.message);
   }
@@ -337,7 +337,7 @@ const newLaunchedCars = async (cityId, type, auth) => {
   try {
     const newLaunchedResult = await newLaunchedQuery();
 
-    return newLaunchedResult;
+    return newLaunchedResult || [];
   } catch (err) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err.message);
   }
@@ -403,7 +403,7 @@ const carsByBudget = async (cityId, auth) => {
       "1Cr+": cars.filter((car) => car.price_range === "10000000+"),
     };
 
-    return carsByPriceRange;
+    return carsByPriceRange || [];
   } catch (err) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err.message);
   }

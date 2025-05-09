@@ -197,9 +197,9 @@ const compare = async (cityId, slug) => {
     });
 
     return {
-      variants: variantDetail,
-      specs: mergedData,
-      basicDetail: basicDetail,
+      variants: variantDetail || [],
+      specs: mergedData || [],
+      basicDetail: basicDetail || [],
     };
   } catch (err) {
     throw new ApiError(

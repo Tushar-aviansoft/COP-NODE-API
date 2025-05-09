@@ -527,7 +527,7 @@ const faq = async (brand, model, variant, cityId) => {
       faqs
     };
 
-    return result;
+    return result || [];
   } catch (err) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err.message);
   }

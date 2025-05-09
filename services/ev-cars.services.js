@@ -7,7 +7,12 @@ const { wishListModelSubQuery } = require("../config/helper");
 
 const brands = async () => {
   const query = db
-    .select("cop_brands_ms.uuid as id", "cop_brands_ms.brand_name")
+    .select("cop_brands_ms.uuid as id", "cop_brands_ms.brand_name",
+      db.raw(
+        `CONCAT(?, cop_brands_ms.brand_id, '/', cop_brands_ms.brand_logo) as brand_logo`,
+        [imagePath.brand]
+      ),
+    )
     .from("cop_brands_ms")
     .innerJoin("cop_models", "cop_models.brand_id", "cop_brands_ms.brand_id")
     .innerJoin("cop_cs_ms", "cop_cs_ms.cs_id", "cop_models.cs_id")
@@ -25,7 +30,7 @@ const brands = async () => {
   try {
     const data = await query;
 
-    return data;
+    return data || [];
   } catch (err) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err.message);
   }
@@ -151,7 +156,7 @@ const models = async (minPrice, maxPrice, brand, cityId, auth) => {
       };
     });
 
-    return data;
+    return data || [];
   } catch (err) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err.message);
   }

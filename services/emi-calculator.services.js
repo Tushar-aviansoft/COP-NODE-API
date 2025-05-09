@@ -35,7 +35,7 @@ const emiVariantDetail = async (brand, model, variant, city, auth) => {
             .whereIn('cop_features_ms.features_name', [Features.batteryCapacity, Features.displacement])
             .first();
 
-        return data;
+        return data || [];
     } catch (err) {
         throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err.message);
     }

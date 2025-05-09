@@ -41,6 +41,7 @@ const models = async (
   const safetyArray = safety.split(",").map((item) => item.trim());
   const interiorArray = interior.split(",").map((item) => item.trim());
   const exteriorArray = exterior.split(",").map((item) => item.trim());
+
   const modelQuery = db("cop_models")
     .select(
       db.raw("CONCAT(brand_name, ' ', cop_models.model_name) AS name"),
@@ -267,7 +268,7 @@ const models = async (
     const totalPages = Math.ceil(totalRecords / limit);
 
     return {
-      data: results,
+      data: results || [],
       pagination: {
         totalRecords,
         totalPages,
@@ -493,7 +494,7 @@ const variants = async (
   try {
     const data = await query;
 
-    return data;
+    return data || [];
   } catch (err) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err.message);
   }
@@ -716,7 +717,7 @@ const budget = async (
         max,
       };
     });
-    return result;
+    return result || [];
   } catch (err) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err.message);
   }
@@ -909,7 +910,7 @@ const brands = async (
   };
   try {
     const data = await query();
-    return data;
+    return data || [];
   } catch (err) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err.message);
   }
@@ -1107,7 +1108,7 @@ const carTypes = async (
   };
   try {
     const data = await query();
-    return data;
+    return data || [];
   } catch (err) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err.message);
   }
@@ -1300,7 +1301,7 @@ const fuelTypes = async (
   };
   try {
     const data = await query();
-    return data;
+    return data || [];
   } catch (err) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err.message);
   }
@@ -1504,7 +1505,7 @@ const engine = async (
   };
   try {
     const data = await query();
-    return data;
+    return data || [];
   } catch (err) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err.message);
   }
@@ -1697,7 +1698,7 @@ const transmission = async (
   };
   try {
     const data = await query();
-    return data;
+    return data || [];
   } catch (err) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err.message);
   }
@@ -1890,7 +1891,7 @@ const driveTrain = async (
   };
   try {
     const data = await query();
-    return data;
+    return data || [];
   } catch (err) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err.message);
   }
@@ -2081,7 +2082,7 @@ const safety = async (
   };
   try {
     const data = await query();
-    return data;
+    return data || [];
   } catch (err) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err.message);
   }
@@ -2271,7 +2272,7 @@ const interior = async (
   };
   try {
     const data = await query();
-    return data;
+    return data || [];
   } catch (err) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err.message);
   }
@@ -2461,7 +2462,7 @@ const exterior = async (
   };
   try {
     const data = await query();
-    return data;
+    return data || [];
   } catch (err) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err.message);
   }
