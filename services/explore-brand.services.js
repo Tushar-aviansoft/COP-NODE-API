@@ -18,7 +18,8 @@ const db = require("../config/database");
 const {
   wishListModelSubQuery,
   wishListVariantSubQuery,
-  processGraphicFiles
+  processGraphicFiles,
+  replaceSpacesInKeys
 } = require("../config/helper");
 const imagePath = require("../config/image-path");
 const ApiError = require("../utils/ApiError");
@@ -272,6 +273,7 @@ const variants = async (brand, model, cityId, fuelType = 'all') => {
             "cop_variants.variant_name",
             "cop_models.image_alt",
             "cop_models.image_title",
+            "cop_models.model_type",
             "cop_variants.uuid as id",
             db.raw(`
               JSON_OBJECTAGG(
@@ -368,20 +370,32 @@ const variants = async (brand, model, cityId, fuelType = 'all') => {
                 formattedFeatures[formattedKey] = typeof value === 'string' ? value.trim() : value;
               }
               if (fuelType && fuelType.toLowerCase() === 'mileage') {
-                const mileage = formattedFeatures.mileage ? formattedFeatures.mileage : '-';
-                const displacement = formattedFeatures.displacement ? formattedFeatures.displacement : '';
-                const type_of_fuel = formattedFeatures.type_of_fuel ? formattedFeatures.type_of_fuel : '';
-                const type_of_transmission = formattedFeatures.type_of_transmission ? formattedFeatures.type_of_transmission : '';
-
-                const powertrain = `${type_of_fuel}-${type_of_transmission} (${displacement})`;
-                const araiMileage = mileage || '-';
-                const realLifeMileageReport = '-';
-
-                return {
-                  powertrain,
-                  araiMileage,
-                  realLifeMileageReport
-                };
+                const mileage = formattedFeatures.mileage || '-';
+                const displacement = formattedFeatures.displacement || '';
+                const type_of_transmission = formattedFeatures.type_of_transmission || '';
+                const battery_capacity = formattedFeatures.battery_capacity || '';
+                const charging_time = formattedFeatures.charging_time || '';
+                const range = formattedFeatures.range || '-';
+              
+                const isEV = variant.model_type == 1;
+                if (isEV) {
+                  return {
+                    powertrain: `EV (${battery_capacity})`,
+                    range,
+                    chargingTime: charging_time || '-',
+                  };
+                } else {
+                  const type_of_fuel = formattedFeatures.type_of_fuel || '';
+                  const powertrain = `${type_of_fuel}-${type_of_transmission} (${displacement})`;
+                  const araiMileage = mileage || '-';
+                  const realLifeMileageReport = '-';
+              
+                  return {
+                    powertrain,
+                    araiMileage,
+                    realLifeMileageReport
+                  };
+                }
               }
               variant.feature_values = formattedFeatures;
             } catch (e) {

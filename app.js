@@ -38,7 +38,6 @@ const tollTaxRoute = require("./routes/toll-tax.routes");
 const jobsRoute = require("./routes/jobs.routes");
 const siteMapRoute = require("./routes/sitemap.routes")
 
-
 const logger = require("./config/logger");
 
 const initializeCrons = require("./jobs/index");
@@ -49,7 +48,7 @@ app.use(cookieParser());
 app.use(express.json());
 // Convert the comma-separated URLs into an array
 const allowedOrigins = process.env.FRONTEND_URLS?.split(",") || [];
- 
+
 app.use(
   cors({
     credentials: true,
@@ -114,8 +113,7 @@ app.use("/seo", seoRoute);
 app.use("/job", jobsRoute);
 app.use("/sitemap", siteMapRoute)
 
-
-app.get("/", (req, res)=>{
+app.get("/", (req, res) => {
   res.send("hello from cop_api !!..")
 })
 

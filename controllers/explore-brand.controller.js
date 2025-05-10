@@ -38,7 +38,7 @@ const models = async (req, res, next) => {
 const variants = async (req, res, next) => {
   try {
     const { brand, model } = req.params;
-    const { type } = req.query;    
+    const { type } = req.query;
     const city = req.city ?? null;
     const models = await exploreBrandService.variants(brand, model, city, type);
 
@@ -204,6 +204,33 @@ const similarModels = async (req, res, next) => {
   }
 };
 
+
+const newsBlogsModelList = async (req, res, next) => {
+  try {
+    const { brand_name } = req.body;
+    const data = await exploreBrandService.newsBlogsModelList(brand_name);
+    res.status(httpStatus.OK).send(data);
+  } catch (error) {
+    next(error);
+  }
+};
+
+const newsBlogsModelDescription = async (req, res, next) => {
+  try {
+    const { model_name } = req.body;
+    const data = await exploreBrandService.newsBlogsModelDescription(model_name);
+    res.status(httpStatus.OK).send({ status: 'success', data });
+  } catch (error) {
+    // This is missing in your code!
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).send({
+      status: 'error',
+      message: error.message || "Something went wrong",
+    });
+  }
+};
+
+
+
 module.exports = {
   brands,
   models,
@@ -218,5 +245,7 @@ module.exports = {
   variantDescription,
   variantFaq,
   modelDescription,
-  similarModels
+  similarModels,
+  newsBlogsModelList,
+  newsBlogsModelDescription
 };

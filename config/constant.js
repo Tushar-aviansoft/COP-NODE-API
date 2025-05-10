@@ -37,6 +37,12 @@ const City = {
   ],
 };
 
+const NewsWP = {
+  'CITY_ID': 160,
+}
+
+
+
 // for spec and features
 const SpecificationCategory = {
   specifications: "Specifications",
@@ -186,7 +192,7 @@ const Exterior = [
   "LED DRLs",
   "Sunroof",
   "Moonroof",
-  "Convertible Top",  
+  "Convertible Top",
   "Chrome Grille",
   "Chrome Garnish",
   "Alloy Wheels",
@@ -205,7 +211,7 @@ const launchMonthList = [3, 6, 9, 12];
 
 // for Login
 const API_URL = {
-  send_otp : "https://www.textguru.in/api/v22.0/"
+  send_otp: "https://www.textguru.in/api/v22.0/"
   // send_otp: "https://control.msg91.com/api/v5/otp?otp_length=6&otp_expiry=10",
   // verify_otp: "https://control.msg91.com/api/v5/otp/verify",
   // resend_otp: "https://control.msg91.com/api/v5/otp/retry",
@@ -390,41 +396,41 @@ const predefinedFeatures = {
   infotainment_System: {
     type: 'features_name',
     values: [
-      "Touch Screen", "Touch Screen Size", "Instrument Cluster", 
-      "Navigation System", "Heads Up Display", "Android Auto", 
-      "Apple Car Play", "Mirror Link", "Speakers Front", 
-      "Speakers Rear", "No. of Speakers", "USB And Auxiliary Input", 
+      "Touch Screen", "Touch Screen Size", "Instrument Cluster",
+      "Navigation System", "Heads Up Display", "Android Auto",
+      "Apple Car Play", "Mirror Link", "Speakers Front",
+      "Speakers Rear", "No. of Speakers", "USB And Auxiliary Input",
       "Ambient Lighting"
     ]
   },
   connectivity_Features: {
     type: 'features_name',
     values: [
-      "Bluetooth Connectivity", "Wifi Connectivity", 
-      "Wireless Phone Charger", "USB Charger", 
-      "Accessory Power Outlet", "Voice Commands", 
-      "Digital Odometer", "Electronic Multi Tripmeter", 
+      "Bluetooth Connectivity", "Wifi Connectivity",
+      "Wireless Phone Charger", "USB Charger",
+      "Accessory Power Outlet", "Voice Commands",
+      "Digital Odometer", "Electronic Multi Tripmeter",
       "Digital Clock", "Outside Temperature Display"
     ]
   },
   safety_And_Driver_Assistance: {
     type: 'features_name',
     values: [
-      "No Of Airbags", "Anti Lock Braking System", 
-      "Electronic Stability Control", "Tyre Pressure Monitor", 
-      "Hill Assist", "Rear Camera", "Blind Spot Monitoring", 
+      "No Of Airbags", "Anti Lock Braking System",
+      "Electronic Stability Control", "Tyre Pressure Monitor",
+      "Hill Assist", "Rear Camera", "Blind Spot Monitoring",
       "Lane Watch Camera", "Parking Sensors", "360 Camera"
     ]
   },
   innovative_Features: {
     type: 'features_name',
     values: [
-      "Active Noise Cancellation", "Engine Auto Start/Stop", 
-      "Gear Shift Indicator", "KeyLess Entry", "Key Trunk Opening", 
-      "Key Fuel Lid Opening", "Key Engine Start/Stop", 
-      "Automatic Headlamps", "Follow Me Home Headlamps", 
-      "Compass", "Cabin Lamps", "Powered Boot", 
-      "Handsfree Tailgate", "Rear Refrigerator", 
+      "Active Noise Cancellation", "Engine Auto Start/Stop",
+      "Gear Shift Indicator", "KeyLess Entry", "Key Trunk Opening",
+      "Key Fuel Lid Opening", "Key Engine Start/Stop",
+      "Automatic Headlamps", "Follow Me Home Headlamps",
+      "Compass", "Cabin Lamps", "Powered Boot",
+      "Handsfree Tailgate", "Rear Refrigerator",
       "Frameless Doors", "Soft Close Doors"
     ]
   },
@@ -467,5 +473,6 @@ module.exports = {
   seoPages,
   seoPagesArray,
   seoType,
-  predefinedFeatures
+  predefinedFeatures,
+  NewsWP
 };

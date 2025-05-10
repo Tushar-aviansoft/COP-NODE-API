@@ -45,6 +45,9 @@ router.get(
   exploreBrandController.modelDescription
 );
 
+router.post("/wp/news-blog-model-list", exploreBrandController.newsBlogsModelList);
+router.post("/wp/news-blog-model-desc", exploreBrandController.newsBlogsModelDescription);
+
 
 router.get(
   "/:brand/:model/:variant",
@@ -84,6 +87,8 @@ router.get(
   validateCity(false),
   exploreBrandController.variantFaq
 );
+
+
 
 
 

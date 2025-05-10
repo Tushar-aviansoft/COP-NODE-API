@@ -5,6 +5,9 @@ const seoMetaData = async (req, res, next) => {
     try {
         const { brand, model, variant, page_name_slug } = req.body;
 
+        console.log(brand,model, variant, page_name_slug );
+        
+
         const data = await seoService.seoMetaData(
             brand,
             model,
