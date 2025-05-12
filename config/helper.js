@@ -101,18 +101,6 @@ function processGraphicFiles(item) {
 function getFeatureValue(feature) {
   return feature ? feature.trim().toLowerCase() : '';
 }
-
-function replaceSpacesInKeys(obj) {
-  const updated = {};
-  for (const key in obj) {
-    if (obj.hasOwnProperty(key)) {
-      const newKey = key.replace(/ /g, '_');
-      updated[newKey] = obj[key];
-    }
-  }
-  return updated;
-}
-
 module.exports = {
   getUpcomingDateRange,
   getNewLaunchedDateRange,
@@ -120,6 +108,5 @@ module.exports = {
   wishListModelSubQuery,
   wishListVariantSubQuery,
   processGraphicFiles,
-  getFeatureValue,
-  replaceSpacesInKeys
+  getFeatureValue
 };

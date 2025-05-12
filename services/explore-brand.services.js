@@ -18,8 +18,7 @@ const db = require("../config/database");
 const {
   wishListModelSubQuery,
   wishListVariantSubQuery,
-  processGraphicFiles,
-  replaceSpacesInKeys
+  processGraphicFiles
 } = require("../config/helper");
 const imagePath = require("../config/image-path");
 const ApiError = require("../utils/ApiError");
@@ -376,7 +375,7 @@ const variants = async (brand, model, cityId, fuelType = 'all') => {
                 const battery_capacity = formattedFeatures.battery_capacity || '';
                 const charging_time = formattedFeatures.charging_time || '';
                 const range = formattedFeatures.range || '-';
-              
+
                 const isEV = variant.model_type == 1;
                 if (isEV) {
                   return {
@@ -389,7 +388,7 @@ const variants = async (brand, model, cityId, fuelType = 'all') => {
                   const powertrain = `${type_of_fuel}-${type_of_transmission} (${displacement})`;
                   const araiMileage = mileage || '-';
                   const realLifeMileageReport = '-';
-              
+
                   return {
                     powertrain,
                     araiMileage,
@@ -745,14 +744,34 @@ const variantDetail = async (
           let featureValues = {};
 
           if (feature_values) {
-            const featureJsonArray = `[${feature_values}]`;
-            const parsedFeatureJson = JSON.parse(featureJsonArray);
+            let featuresArray;
 
-            featureValues = parsedFeatureJson.reduce((acc, feature) => {
-              const key = Object.keys(feature)[0];
-              const value = feature[key];
-              const displayName = FeaturesDisplayName[key] || key;
-              acc[displayName] = value;
+            if (typeof feature_values === 'string') {
+              try {
+                featuresArray = JSON.parse(feature_values.startsWith('[') ?
+                  feature_values :
+                  `[${feature_values}]`);
+              } catch (e) {
+                console.error('Failed to parse feature_values:', feature_values);
+                featuresArray = [];
+              }
+            } else if (Array.isArray(feature_values)) {
+              featuresArray = feature_values;
+            } else {
+              featuresArray = [];
+            }
+
+            featureValues = featuresArray.reduce((acc, feature) => {
+              if (feature && typeof feature === 'object') {
+                const key = Object.keys(feature)[0];
+                if (key) {
+                  const value = feature[key];
+                  const underscoreKey = key.trim()
+                    .replace(/\s+/g, '_')
+                    .replace(/[()]/g, '');
+                  acc[underscoreKey] = typeof value === 'string' ? value.trim() : value;
+                }
+              }
               return acc;
             }, {});
           }

@@ -915,7 +915,6 @@ const brands = async (
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err.message);
   }
 };
-
 const carTypes = async (
   brands,
   fuelTypes,

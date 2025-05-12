@@ -46,7 +46,6 @@ const models = async (req, res, next) => {
     next(error);
   }
 };
-
 const variants = async (req, res, next) => {
   try {
     const {
@@ -84,8 +83,6 @@ const variants = async (req, res, next) => {
     next(error);
   }
 };
-
-
 const budget = async (req, res, next) => {
   try {
     const {
@@ -116,8 +113,6 @@ const budget = async (req, res, next) => {
     next(error);
   }
 };
-
-
 const brands = async (req, res, next) => {
   try {
     const {
@@ -132,8 +127,6 @@ const brands = async (req, res, next) => {
       minPrice = "",
       maxPrice = "",
     } = req.query;
-
-    
     const data = await advancedSearchService.brands(
       carTypes,
       fuelTypes,
