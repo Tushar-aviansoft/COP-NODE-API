@@ -727,67 +727,71 @@ const variantDetail = async (
             ])
             .groupBy("cop_pe_ms.model_id")
         )
+        .havingNotNull("variant_json")
         .limit(6);
+
+
       const result = await similarVariantsQuery;
-      const similarVariantsResult = result.map((variant) => {
-        if (variant.variant_json) {
-          const variant_details = JSON.parse(variant.variant_json);
-          const {
-            id,
-            variant_name,
-            variant_image,
-            feature_values,
-            ex_showroom_price,
-            full_slug,
-          } = variant_details;
+      const similarVariantsResult = result.filter(variant => variant.variant_json !== null)
+        .map((variant) => {
+          if (variant.variant_json) {
+            const variant_details = JSON.parse(variant.variant_json);
+            const {
+              id,
+              variant_name,
+              variant_image,
+              feature_values,
+              ex_showroom_price,
+              full_slug,
+            } = variant_details;
 
-          let featureValues = {};
+            let featureValues = {};
 
-          if (feature_values) {
-            let featuresArray;
+            if (feature_values) {
+              let featuresArray;
 
-            if (typeof feature_values === 'string') {
-              try {
-                featuresArray = JSON.parse(feature_values.startsWith('[') ?
-                  feature_values :
-                  `[${feature_values}]`);
-              } catch (e) {
-                console.error('Failed to parse feature_values:', feature_values);
+              if (typeof feature_values === 'string') {
+                try {
+                  featuresArray = JSON.parse(feature_values.startsWith('[') ?
+                    feature_values :
+                    `[${feature_values}]`);
+                } catch (e) {
+                  console.error('Failed to parse feature_values:', feature_values);
+                  featuresArray = [];
+                }
+              } else if (Array.isArray(feature_values)) {
+                featuresArray = feature_values;
+              } else {
                 featuresArray = [];
               }
-            } else if (Array.isArray(feature_values)) {
-              featuresArray = feature_values;
-            } else {
-              featuresArray = [];
-            }
 
-            featureValues = featuresArray.reduce((acc, feature) => {
-              if (feature && typeof feature === 'object') {
-                const key = Object.keys(feature)[0];
-                if (key) {
-                  const value = feature[key];
-                  const underscoreKey = key.trim()
-                    .replace(/\s+/g, '_')
-                    .replace(/[()]/g, '');
-                  acc[underscoreKey] = typeof value === 'string' ? value.trim() : value;
+              featureValues = featuresArray.reduce((acc, feature) => {
+                if (feature && typeof feature === 'object') {
+                  const key = Object.keys(feature)[0];
+                  if (key) {
+                    const value = feature[key];
+                    const underscoreKey = key.trim()
+                      .replace(/\s+/g, '_')
+                      .replace(/[()]/g, '');
+                    acc[underscoreKey] = typeof value === 'string' ? value.trim() : value;
+                  }
                 }
-              }
-              return acc;
-            }, {});
+                return acc;
+              }, {});
+            }
+            return {
+              id: id,
+              brand_name: variant.brand_name,
+              model_name: variant.model_name,
+              variant_name,
+              variant_image,
+              feature_values: featureValues,
+              ex_showroom_price,
+              full_slug,
+            };
           }
-          return {
-            id: id,
-            brand_name: variant.brand_name,
-            model_name: variant.model_name,
-            variant_name,
-            variant_image,
-            feature_values: featureValues,
-            ex_showroom_price,
-            full_slug,
-          };
-        }
-        return variant || [];
-      });
+          return variant || [];
+        });
       return { similar_variants: similarVariantsResult || [] };
     }
     return { variant_detail: variantDetail || [] };
