@@ -23,9 +23,9 @@ const models = async (
 ) => {
 
   const offset = (page - 1) * limit;
-  const brandsArray = brands.split(",").map((item) => item.trim());
-  const carTypesArray = carTypes.split(",").map((item) => item.trim());
-  const budgetArray = budget.split(",").map((item) => item.trim());
+  const brandsArray = (brands || "").split(",").map((item) => item.trim());
+  const carTypesArray = (carTypes || "").split(",").map((item) => item.trim());
+  const budgetArray = (budget || "").split(",").map((item) => item.trim());
 
   const { startDate, endDate } = getUpcomingDateRange(launchMonth);
 
@@ -131,9 +131,9 @@ const models = async (
       return {
         data: results[0]
           ? {
-              ...results[0],
-              launch_date: formatDate(results[0].launch_date),
-            }
+            ...results[0],
+            launch_date: formatDate(results[0].launch_date),
+          }
           : null,
       };
     }
