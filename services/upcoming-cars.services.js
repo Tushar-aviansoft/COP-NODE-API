@@ -28,8 +28,6 @@ const models = async (
   const budgetArray = budget.split(",").map((item) => item.trim());
 
   const { startDate, endDate } = getUpcomingDateRange(launchMonth);
-  console.log("🚀 ~ startDate, endDate:", startDate, endDate)
-
 
   const modelQuery = db("cop_models")
     .select(
@@ -50,7 +48,7 @@ const models = async (
     )
     .join("cop_brands_ms", "cop_brands_ms.brand_id", "=", "cop_models.brand_id")
     .join("cop_cs_ms", "cop_cs_ms.cs_id", "=", "cop_models.cs_id")
-    .whereBetween("cop_models.launch_date", [startDate, endDate])
+    // .whereBetween("cop_models.launch_date", [startDate, endDate])
     .where(function () {
       this.whereBetween("cop_models.min_price", [MIN_PRICE, MAX_PRICE])
         .orWhereBetween("cop_models.max_price", [MIN_PRICE, MAX_PRICE]);
@@ -66,6 +64,7 @@ const models = async (
           .where(db.raw("CONCAT(cop_brands_ms.slug, '-cars')"), brand)
           .andWhere("cop_models.slug", model);
       } else {
+        queryBuilder.whereBetween("cop_models.launch_date", [startDate, endDate]);
         if (brands.length > 0) {
           queryBuilder.whereIn("cop_brands_ms.brand_name", brandsArray);
         }
