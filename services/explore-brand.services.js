@@ -532,6 +532,7 @@ const variantDetail = async (
   similarVariants,
   auth
 ) => {
+  
   const query = db("cop_variants")
     .select(
       "cop_variants.uuid as id",
@@ -620,6 +621,7 @@ const variantDetail = async (
       return item;
     });
     if (similarVariants) {
+      
       const exShowroomPrice = data[0]["ex_showroom_price"];
       const modelType = data[0]["model_type"];
       const modelId = data[0]["model_id"];
@@ -704,6 +706,7 @@ const variantDetail = async (
         )
         .leftJoin("cop_ct_ms", "cop_ct_ms.ct_id", "cop_models.ct_id")
         .where("cop_models.uuid", "!=", modelId)
+        .where("cop_models.status", 1)
         .andWhere("cop_models.model_type", "=", modelType)
         .where(function () {
           if (exShowroomPrice < 1000000) {
@@ -790,6 +793,7 @@ const variantDetail = async (
               full_slug,
             };
           }
+                    
           return variant || [];
         });
       return { similar_variants: similarVariantsResult || [] };
