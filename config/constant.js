@@ -442,6 +442,10 @@ const predefinedFeatures = {
   }
 };
 
+const DefaultCity = {
+  surat : "160"
+}
+
 module.exports = {
   Banners,
   Features,
@@ -474,5 +478,6 @@ module.exports = {
   seoPagesArray,
   seoType,
   predefinedFeatures,
-  NewsWP
+  NewsWP,
+  DefaultCity
 };

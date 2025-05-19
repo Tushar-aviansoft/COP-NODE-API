@@ -3,8 +3,9 @@ const ApiError = require("../utils/ApiError");
 const httpStatus = require("http-status");
 
 const search = async (search) => {
+  
   const query = () => {
-    return db("search_list")
+    return db("global_search_list")
       .select("id", "name", "slug")
       .where("name", "like", `${search}%`)
       .orWhere("name", "like", `%${search}%`)
@@ -19,7 +20,7 @@ const search = async (search) => {
   try {
     let result = await query();
     if (result.length == 0) {
-      result = await db("search_list")
+      result = await db("global_search_list")
         .select("id", "name", "slug")
         .where("name", "like", `${search.charAt(0)}%`)
         .orWhere("name", "like", `%${search.charAt(0)}%`)

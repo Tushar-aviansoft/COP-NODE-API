@@ -87,6 +87,7 @@ const brands = async (models = false, carTypes = false) => {
 
 const models = async (
   brandSlug,
+  modelSlug,
   carType,
   cityId,
   page = 1,
@@ -94,6 +95,37 @@ const models = async (
   auth
 ) => {
   const offset = (page - 1) * limit;
+
+  if (modelSlug) {
+    const basicModelQuery = db
+      .select(
+        db.raw("CONCAT(brand_name, ' ', cop_models.model_name) AS name"),
+        db.raw('CONCAT(cop_brands_ms.slug, "-cars/", cop_models.slug) AS slug'),
+        db.raw(
+          `CONCAT(?, cop_brands_ms.brand_id, '/', cop_models.model_id,'/' , cop_models.model_image) as model_image`,
+          [imagePath.brand]
+        ),
+        "cop_models.image_alt",
+        "cop_models.image_title",
+        "cop_models.min_price",
+        "cop_models.max_price"
+      )
+      .from("cop_models")
+      .innerJoin("cop_brands_ms", "cop_brands_ms.brand_id", "cop_models.brand_id")
+      .where(db.raw(`CONCAT(cop_brands_ms.slug, '-cars')`), brandSlug)
+      .andWhere("cop_models.slug", modelSlug)
+      .andWhere("cop_brands_ms.status", 1)
+      .andWhere("cop_models.status", 1)
+      .first();
+
+    try {
+      const modelData = await basicModelQuery;
+      return modelData || [];
+    } catch (err) {
+      throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err.message);
+    }
+  }
+
   const query = db
     .select(
       "ct_name as car_type",
@@ -188,6 +220,7 @@ const models = async (
     })
     .limit(limit)
     .offset(offset);
+
   try {
     const data = await query;
     const totalRecords = data.length ? data[0].total_count : 0;
@@ -532,7 +565,7 @@ const variantDetail = async (
   similarVariants,
   auth
 ) => {
-  
+
   const query = db("cop_variants")
     .select(
       "cop_variants.uuid as id",
@@ -621,7 +654,7 @@ const variantDetail = async (
       return item;
     });
     if (similarVariants) {
-      
+
       const exShowroomPrice = data[0]["ex_showroom_price"];
       const modelType = data[0]["model_type"];
       const modelId = data[0]["model_id"];
@@ -793,7 +826,7 @@ const variantDetail = async (
               full_slug,
             };
           }
-                    
+
           return variant || [];
         });
       return { similar_variants: similarVariantsResult || [] };

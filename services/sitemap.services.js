@@ -26,7 +26,7 @@ const siteMap = async (model, variant) => {
                 .innerJoin("cop_fv", "cop_fv.variant_id", "cop_variants.variant_id")
                 .innerJoin("cop_features_ms", "cop_features_ms.feature_id", "cop_fv.feature_id")
                 .select(
-                    db.raw(`CONCAT(cop_brands_ms.slug, '-cars/', cop_models.slug, '/', cop_variants.slug) AS slug`)
+                    db.raw(`CONCAT('/', cop_brands_ms.slug, '-cars/', cop_models.slug, '/', cop_variants.slug) AS slug`)
                 )
                 .where("cop_brands_ms.status", 1)
                 .where("cop_models.status", 1)

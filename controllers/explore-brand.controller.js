@@ -13,13 +13,14 @@ const brands = async (req, res, next) => {
 };
 const models = async (req, res, next) => {
   try {
-    const { page, limit, carType } = req.query;
+    const { page, limit, carType, modelSlug } = req.query;
     const { slug } = req.params;
     const city = req.city;
     const auth = req.auth;
 
     const models = await exploreBrandService.models(
       slug,
+      modelSlug,
       carType,
       city,
       page,
