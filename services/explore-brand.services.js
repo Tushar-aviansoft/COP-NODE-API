@@ -572,6 +572,7 @@ const variantDetail = async (
       "cop_models.uuid as model_id",
       "brand_name",
       "model_name",
+      "launch_date",
       "variant_name",
       "cop_models.model_type",
       "ct_name",
@@ -636,6 +637,11 @@ const variantDetail = async (
       return [];
     }
     const variantDetail = data.map((item) => {
+      if (item.launch_date) {
+        const dateObj = new Date(item.launch_date);
+        const options = { day: '2-digit', month: 'short', year: 'numeric' };
+        item.launch_date = dateObj.toLocaleDateString('en-GB', options).replace(/ /g, ' ');
+      }
       if (item.feature_values) {
         const featureObj = JSON.parse(item.feature_values);;
         const order = variantFeatures;
@@ -836,6 +842,7 @@ const variantDetail = async (
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err.message);
   }
 };
+
 
 const variantColors = async (brand, model, variant) => {
   const query = db("cop_colors")
